@@ -66,7 +66,7 @@ Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
-])->group(function () {
+])->name('dashboard')->group(function () {
     Route::get('/dashboard', function () {
         $user = auth()->user();
         if ($user->role && $user->role->slug === 'admin') {

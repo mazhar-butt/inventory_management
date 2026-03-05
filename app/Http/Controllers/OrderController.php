@@ -122,6 +122,8 @@ class OrderController extends Controller
         $taxPercentage = 0;
         $grandTotal = $totalAmount;
 
+        $redirectRoute = $this->getRedirectRoute($user);
+
         $order = Order::create([
             'branch_id' => $validated['branch_id'],
             'user_id' => auth()->id(), // Use currently logged in user
@@ -162,7 +164,7 @@ class OrderController extends Controller
             }
         }
 
-        return redirect()->route('orders.index')
+        return redirect()->route($redirectRoute)
             ->with('success', 'Order created successfully.');
     }
 
@@ -275,7 +277,8 @@ class OrderController extends Controller
             }
         }
 
-        return redirect()->route('orders.index')
+        $redirectRoute = $this->getRedirectRoute($user);
+        return redirect()->route($redirectRoute)
             ->with('success', 'Order updated successfully.');
     }
 
@@ -320,7 +323,18 @@ class OrderController extends Controller
         
         $order->delete();
 
-        return redirect()->route('orders.index')
+        $redirectRoute = $this->getRedirectRoute($user);
+        return redirect()->route($redirectRoute)
             ->with('success', 'Order deleted successfully.');
+    }
+
+    private function getRedirectRoute($user)
+    {
+        if ($user->role && $user->role->slug === 'manager') {
+            return 'manager.orders.index';
+        } elseif ($user->role && $user->role->slug === 'sales') {
+            return 'sales.orders.index';
+        }
+        return 'manager.orders.index'; // Default fallback
     }
 }

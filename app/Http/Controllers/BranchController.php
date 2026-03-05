@@ -40,7 +40,7 @@ class BranchController extends Controller
 
         Branch::create($validated);
 
-        return redirect()->route('branches.index')
+        return redirect()->route('admin.branches.index')
             ->with('success', 'Branch created successfully.');
     }
 
@@ -55,7 +55,7 @@ class BranchController extends Controller
 
         $branch->update($validated);
 
-        return redirect()->route('branches.index')
+        return redirect()->route('admin.branches.index')
             ->with('success', 'Branch updated successfully.');
     }
 
@@ -63,7 +63,7 @@ class BranchController extends Controller
     {
         $branch->delete();
 
-        return redirect()->route('branches.index')
+        return redirect()->route('admin.branches.index')
             ->with('success', 'Branch deleted successfully.');
     }
 }

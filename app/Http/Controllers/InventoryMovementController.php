@@ -65,7 +65,7 @@ class InventoryMovementController extends Controller
 
         InventoryMovement::create($validated);
 
-        return redirect()->route('inventory-movements.index')
+        return redirect()->route('admin.inventory-movements.index')
             ->with('success', 'Inventory movement recorded successfully.');
     }
 
@@ -95,7 +95,7 @@ class InventoryMovementController extends Controller
 
         $inventoryMovement->update($validated);
 
-        return redirect()->route('inventory-movements.index')
+        return redirect()->route('admin.inventory-movements.index')
             ->with('success', 'Inventory movement updated successfully.');
     }
 
@@ -117,7 +117,7 @@ class InventoryMovementController extends Controller
         
         $inventoryMovement->delete();
 
-        return redirect()->route('inventory-movements.index')
+        return redirect()->route('admin.inventory-movements.index')
             ->with('success', 'Inventory movement deleted successfully.');
     }
 }

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import FormInput from '@/Components/FormInput.vue';
@@ -11,6 +11,17 @@ const props = defineProps({
     branches: Array,
     products: Array,
 });
+
+const page = usePage();
+
+// Get the URL prefix based on user role
+const getUrlPrefix = () => {
+    const role = page.props.auth?.user?.role;
+    if (role === 'admin') return '/admin';
+    if (role === 'manager') return '/manager';
+    if (role === 'sales') return '/sales';
+    return '/admin'; // default
+};
 
 const showModal = ref(false);
 const editingItem = ref(null);
@@ -73,7 +84,8 @@ const closeAddStockModal = () => {
 };
 
 const handleAddStock = () => {
-    addStockForm.post(`/inventories/${selectedInventory.value.id}/add-stock`, {
+    const prefix = getUrlPrefix();
+    addStockForm.post(`${prefix}/inventories/${selectedInventory.value.id}/add-stock`, {
         onSuccess: () => {
             showSuccess('Stock added successfully');
             closeAddStockModal();
@@ -88,15 +100,16 @@ const closeModal = () => {
 };
 
 const handleSubmit = () => {
+    const prefix = getUrlPrefix();
     if (editingItem.value) {
-        form.put(`/inventories/${editingItem.value.id}`, {
+        form.put(`${prefix}/inventories/${editingItem.value.id}`, {
             onSuccess: () => {
                 showSuccess('Inventory updated successfully');
                 closeModal();
             },
         });
     } else {
-        form.post('/inventories', {
+        form.post(`${prefix}/inventories`, {
             onSuccess: () => {
                 showSuccess('Inventory created successfully');
                 closeModal();
@@ -106,9 +119,10 @@ const handleSubmit = () => {
 };
 
 const handleDelete = (item) => {
+    const prefix = getUrlPrefix();
     showDeleteConfirm(`${item.branch?.name} - ${item.product?.name}`).then((result) => {
         if (result.isConfirmed) {
-            form.delete(`/inventories/${item.id}`, {
+            form.delete(`${prefix}/inventories/${item.id}`, {
                 onSuccess: () => {
                     showSuccess('Inventory deleted successfully');
                 },

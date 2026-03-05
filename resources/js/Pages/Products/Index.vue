@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import FormInput from '@/Components/FormInput.vue';
@@ -9,6 +9,15 @@ import Swal, { showSuccess, showDeleteConfirm } from '@/Plugins/sweetalert';
 const props = defineProps({
     products: Object,
 });
+
+const page = usePage();
+
+// Get the URL prefix based on user role
+const getUrlPrefix = () => {
+    const role = page.props.auth?.user?.role;
+    if (role === 'admin') return '/admin';
+    return '/admin'; // default
+};
 
 const showModal = ref(false);
 const editingItem = ref(null);
@@ -67,14 +76,16 @@ const closeModal = () => {
 
 const handleSubmit = () => {
     if (editingItem.value) {
-        form.put(`/products/${editingItem.value.id}`, {
+        const prefix = getUrlPrefix();
+        form.put(`${prefix}/products/${editingItem.value.id}`, {
             onSuccess: () => {
                 showSuccess('Product updated successfully');
                 closeModal();
             },
         });
     } else {
-        form.post('/products', {
+        const prefix = getUrlPrefix();
+        form.post(`${prefix}/products`, {
             onSuccess: () => {
                 showSuccess('Product created successfully');
                 closeModal();
@@ -86,7 +97,8 @@ const handleSubmit = () => {
 const handleDelete = (item) => {
     showDeleteConfirm(item.name).then((result) => {
         if (result.isConfirmed) {
-            form.delete(`/products/${item.id}`, {
+            const prefix = getUrlPrefix();
+            form.delete(`${prefix}/products/${item.id}`, {
                 onSuccess: () => {
                     showSuccess('Product deleted successfully');
                 },

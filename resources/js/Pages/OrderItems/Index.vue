@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import FormInput from '@/Components/FormInput.vue';
@@ -11,6 +11,17 @@ const props = defineProps({
     orders: Array,
     products: Array,
 });
+
+const page = usePage();
+
+// Get the URL prefix based on user role
+const getUrlPrefix = () => {
+    const role = page.props.auth?.user?.role;
+    if (role === 'admin') return '/admin';
+    if (role === 'manager') return '/manager';
+    if (role === 'sales') return '/sales';
+    return '/admin'; // default
+};
 
 const showModal = ref(false);
 const editingItem = ref(null);
@@ -73,14 +84,16 @@ const calculateTotal = () => {
 
 const handleSubmit = () => {
     if (editingItem.value) {
-        form.put(`/order-items/${editingItem.value.id}`, {
+        const prefix = getUrlPrefix();
+        form.put(`${prefix}/order-items/${editingItem.value.id}`, {
             onSuccess: () => {
                 showSuccess('Order item updated successfully');
                 closeModal();
             },
         });
     } else {
-        form.post('/order-items', {
+        const prefix = getUrlPrefix();
+        form.post(`${prefix}/order-items`, {
             onSuccess: () => {
                 showSuccess('Order item created successfully');
                 closeModal();
@@ -92,7 +105,8 @@ const handleSubmit = () => {
 const handleDelete = (item) => {
     showDeleteConfirm(`Order Item #${item.id}`).then((result) => {
         if (result.isConfirmed) {
-            form.delete(`/order-items/${item.id}`, {
+            const prefix = getUrlPrefix();
+            form.delete(`${prefix}/order-items/${item.id}`, {
                 onSuccess: () => {
                     showSuccess('Order item deleted successfully');
                 },

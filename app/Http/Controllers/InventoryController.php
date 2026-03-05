@@ -80,7 +80,8 @@ class InventoryController extends Controller
                 'notes' => 'Stock added via inventory creation (existing item updated)',
             ]);
             
-            return redirect()->route('inventories.index')
+            $routePrefix = $isAdmin ? 'admin' : 'manager';
+            return redirect()->route($routePrefix . '.inventories.index')
                 ->with('success', 'Inventory updated successfully.');
         }
 
@@ -98,7 +99,8 @@ class InventoryController extends Controller
             'notes' => 'Initial stock added via inventory creation',
         ]);
 
-        return redirect()->route('inventories.index')
+        $routePrefix = $isAdmin ? 'admin' : 'manager';
+        return redirect()->route($routePrefix . '.inventories.index')
             ->with('success', 'Inventory created successfully.');
     }
 
@@ -143,7 +145,8 @@ class InventoryController extends Controller
             ]);
         }
 
-        return redirect()->route('inventories.index')
+        $routePrefix = $isAdmin ? 'admin' : 'manager';
+        return redirect()->route($routePrefix . '.inventories.index')
             ->with('success', 'Inventory updated successfully.');
     }
 
@@ -175,7 +178,8 @@ class InventoryController extends Controller
         
         $inventory->delete();
 
-        return redirect()->route('inventories.index')
+        $routePrefix = $isAdmin ? 'admin' : 'manager';
+        return redirect()->route($routePrefix . '.inventories.index')
             ->with('success', 'Inventory deleted successfully.');
     }
 
@@ -218,7 +222,8 @@ class InventoryController extends Controller
             'notes' => 'Stock added via add stock functionality',
         ]);
 
-        return redirect()->route('inventories.index')
+        $routePrefix = $isAdmin ? 'admin' : 'manager';
+        return redirect()->route($routePrefix . '.inventories.index')
             ->with('success', 'Stock added successfully.');
     }
 }

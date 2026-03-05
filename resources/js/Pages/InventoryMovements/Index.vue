@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import FormInput from '@/Components/FormInput.vue';
@@ -11,6 +11,15 @@ const props = defineProps({
     branches: Array,
     products: Array,
 });
+
+const page = usePage();
+
+// Get the URL prefix based on user role
+const getUrlPrefix = () => {
+    const role = page.props.auth?.user?.role;
+    if (role === 'admin') return '/admin';
+    return '/admin'; // default
+};
 
 const showModal = ref(false);
 const editingItem = ref(null);
@@ -79,14 +88,16 @@ const closeModal = () => {
 
 const handleSubmit = () => {
     if (editingItem.value) {
-        form.put(`/inventory-movements/${editingItem.value.id}`, {
+        const prefix = getUrlPrefix();
+        form.put(`${prefix}/inventory-movements/${editingItem.value.id}`, {
             onSuccess: () => {
                 showSuccess('Inventory movement updated successfully');
                 closeModal();
             },
         });
     } else {
-        form.post('/inventory-movements', {
+        const prefix = getUrlPrefix();
+        form.post(`${prefix}/inventory-movements`, {
             onSuccess: () => {
                 showSuccess('Inventory movement recorded successfully');
                 closeModal();
@@ -98,7 +109,8 @@ const handleSubmit = () => {
 const handleDelete = (item) => {
     showDeleteConfirm(`Movement #${item.id}`).then((result) => {
         if (result.isConfirmed) {
-            form.delete(`/inventory-movements/${item.id}`, {
+            const prefix = getUrlPrefix();
+            form.delete(`${prefix}/inventory-movements/${item.id}`, {
                 onSuccess: () => {
                     showSuccess('Inventory movement deleted successfully');
                 },

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import FormInput from '@/Components/FormInput.vue';
@@ -11,6 +11,17 @@ const props = defineProps({
     branches: Array,
     branchInventories: Object,
 });
+
+const page = usePage();
+
+// Get the URL prefix based on user role
+const getUrlPrefix = () => {
+    const role = page.props.auth?.user?.role;
+    if (role === 'admin') return '/admin';
+    if (role === 'manager') return '/manager';
+    if (role === 'sales') return '/sales';
+    return '/admin'; // default
+};
 
 const showModal = ref(false);
 const editingItem = ref(null);
@@ -141,14 +152,16 @@ const calculateGrandTotal = () => {
 
 const handleSubmit = () => {
     if (editingItem.value) {
-        form.put(`/orders/${editingItem.value.id}`, {
+        const prefix = getUrlPrefix();
+        form.put(`${prefix}/orders/${editingItem.value.id}`, {
             onSuccess: () => {
                 showSuccess('Order updated successfully');
                 closeModal();
             },
         });
     } else {
-        form.post('/orders', {
+        const prefix = getUrlPrefix();
+        form.post(`${prefix}/orders`, {
             onSuccess: () => {
                 showSuccess('Order created successfully');
                 closeModal();
@@ -160,7 +173,8 @@ const handleSubmit = () => {
 const handleDelete = (item) => {
     showDeleteConfirm(`Order #${item.id}`).then((result) => {
         if (result.isConfirmed) {
-            form.delete(`/orders/${item.id}`, {
+            const prefix = getUrlPrefix();
+            form.delete(`${prefix}/orders/${item.id}`, {
                 onSuccess: () => {
                     showSuccess('Order deleted successfully');
                 },
@@ -459,7 +473,7 @@ const getCompletedOrders = computed(() => {
                     </div>
                 </div>
 
-                <FormInput v-model="form.status" type="select" label="Status" placeholder="Select status" :options="statusOptions" :error="form.errors.status" required />
+                <!-- <FormInput v-model="form.status" type="select" label="Status" placeholder="Select status" :options="statusOptions" :error="form.errors.status" required /> -->
             </form>
             <template #footer>
                 <div class="flex justify-end gap-3">

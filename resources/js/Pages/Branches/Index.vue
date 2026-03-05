@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import FormInput from '@/Components/FormInput.vue';
@@ -11,6 +11,15 @@ const props = defineProps({
     users: Array,
     managers: Array,
 });
+
+const page = usePage();
+
+// Get the URL prefix based on user role
+const getUrlPrefix = () => {
+    const role = page.props.auth?.user?.role;
+    if (role === 'admin') return '/admin';
+    return '/admin'; // default
+};
 
 const showModal = ref(false);
 const editingItem = ref(null);
@@ -67,14 +76,16 @@ const closeModal = () => {
 
 const handleSubmit = () => {
     if (editingItem.value) {
-        form.put(`/branches/${editingItem.value.id}`, {
+        const prefix = getUrlPrefix();
+        form.put(`${prefix}/branches/${editingItem.value.id}`, {
             onSuccess: () => {
                 showSuccess('Branch updated successfully');
                 closeModal();
             },
         });
     } else {
-        form.post('/branches', {
+        const prefix = getUrlPrefix();
+        form.post(`${prefix}/branches`, {
             onSuccess: () => {
                 showSuccess('Branch created successfully');
                 closeModal();
@@ -86,7 +97,8 @@ const handleSubmit = () => {
 const handleDelete = (item) => {
     showDeleteConfirm(item.name).then((result) => {
         if (result.isConfirmed) {
-            form.delete(`/branches/${item.id}`, {
+            const prefix = getUrlPrefix();
+            form.delete(`${prefix}/branches/${item.id}`, {
                 onSuccess: () => {
                     showSuccess('Branch deleted successfully');
                 },

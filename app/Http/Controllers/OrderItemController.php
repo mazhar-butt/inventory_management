@@ -77,7 +77,8 @@ class OrderItemController extends Controller
 
         OrderItem::create($validated);
 
-        return redirect()->route('order-items.index')
+        $routePrefix = $isAdmin ? 'admin' : ($user->role && $user->role->slug === 'manager' ? 'manager' : 'sales');
+        return redirect()->route($routePrefix . '.order-items.index')
             ->with('success', 'Order item created successfully.');
     }
 
@@ -91,7 +92,8 @@ class OrderItemController extends Controller
 
         $orderItem->update($validated);
 
-        return redirect()->route('order-items.index')
+        $routePrefix = $isAdmin ? 'admin' : ($user->role && $user->role->slug === 'manager' ? 'manager' : 'sales');
+        return redirect()->route($routePrefix . '.order-items.index')
             ->with('success', 'Order item updated successfully.');
     }
 
@@ -116,7 +118,8 @@ class OrderItemController extends Controller
         
         $orderItem->delete();
 
-        return redirect()->route('order-items.index')
+        $routePrefix = $isAdmin ? 'admin' : ($user->role && $user->role->slug === 'manager' ? 'manager' : 'sales');
+        return redirect()->route($routePrefix . '.order-items.index')
             ->with('success', 'Order item deleted successfully.');
     }
 }
