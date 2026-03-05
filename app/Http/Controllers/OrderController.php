@@ -18,25 +18,32 @@ class OrderController extends Controller
     {
         $user = auth()->user();
         $isAdmin = $user->role && $user->role->slug === 'admin';
+        $isSales = $user->role && $user->role->slug === 'sales';
+        $isManager = $user->role && $user->role->slug === 'manager';
         
         // Get user's managed branches if manager
         $managedBranchIds = [];
-        if (!$isAdmin && $user->role && ($user->role->slug === 'manager' || $user->role->slug === 'sales')) {
+        if ($isManager) {
             $managedBranchIds = $user->managedBranches()->pluck('id')->toArray();
         }
         
+        // Admin sees all orders
+        // Manager sees orders from their managed branches
+        // Sales sees only orders they created
         $orders = Order::with(['branch', 'user', 'items.product'])
-            ->when(!$isAdmin && count($managedBranchIds) > 0, fn($q) => $q->whereIn('branch_id', $managedBranchIds))
+            ->when($isSales, fn($q) => $q->where('user_id', $user->id))
+            ->when($isManager && count($managedBranchIds) > 0, fn($q) => $q->whereIn('branch_id', $managedBranchIds))
             ->paginate(10);
         
+        // Sales can select any branch, manager can only select their assigned branches
         $branches = Branch::select('id', 'name')
-            ->when(!$isAdmin && count($managedBranchIds) > 0, fn($q) => $q->whereIn('id', $managedBranchIds))
+            ->when($isManager && count($managedBranchIds) > 0, fn($q) => $q->whereIn('id', $managedBranchIds))
             ->get();
         
         // Get products with their quantities for allowed branches
         $branchInventories = [];
         $inventoriesQuery = Inventory::with('product');
-        if (!$isAdmin && count($managedBranchIds) > 0) {
+        if ($isManager && count($managedBranchIds) > 0) {
             $inventoriesQuery = $inventoriesQuery->whereIn('branch_id', $managedBranchIds);
         }
         $allInventories = $inventoriesQuery->get();
@@ -67,10 +74,12 @@ class OrderController extends Controller
     {
         $user = auth()->user();
         $isAdmin = $user->role && $user->role->slug === 'admin';
+        $isSales = $user->role && $user->role->slug === 'sales';
+        $isManager = $user->role && $user->role->slug === 'manager';
         
-        // Get user's managed branches if manager or sales
+        // Get user's managed branches if manager
         $managedBranchIds = [];
-        if (!$isAdmin && $user->role && ($user->role->slug === 'manager' || $user->role->slug === 'sales')) {
+        if ($isManager) {
             $managedBranchIds = $user->managedBranches()->pluck('id')->toArray();
         }
         
@@ -82,8 +91,8 @@ class OrderController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
         ]);
 
-        // Check if user can manage this branch
-        if (!$isAdmin && !in_array($validated['branch_id'], $managedBranchIds)) {
+        // Check if user can manage this branch - sales can select any branch, manager can only select their assigned branches
+        if (!$isAdmin && $isManager && !in_array($validated['branch_id'], $managedBranchIds)) {
             return back()->withErrors(['branch_id' => 'You can only manage orders for your assigned branch.']);
         }
 
@@ -172,15 +181,17 @@ class OrderController extends Controller
     {
         $user = auth()->user();
         $isAdmin = $user->role && $user->role->slug === 'admin';
+        $isSales = $user->role && $user->role->slug === 'sales';
+        $isManager = $user->role && $user->role->slug === 'manager';
         
-        // Get user's managed branches if manager or sales
+        // Get user's managed branches if manager
         $managedBranchIds = [];
-        if (!$isAdmin && $user->role && ($user->role->slug === 'manager' || $user->role->slug === 'sales')) {
+        if ($isManager) {
             $managedBranchIds = $user->managedBranches()->pluck('id')->toArray();
         }
         
-        // Check if user can manage this branch
-        if (!$isAdmin && !in_array($order->branch_id, $managedBranchIds)) {
+        // Check if user can manage this branch - sales can select any branch, manager can only select their assigned branches
+        if (!$isAdmin && $isManager && !in_array($order->branch_id, $managedBranchIds)) {
             return back()->withErrors(['branch_id' => 'You can only manage orders for your assigned branch.']);
         }
         
