@@ -23,6 +23,7 @@
         "vue": "^3.3.13"
     },
     "dependencies": {
+        "nprogress": "^0.2.0",
         "sweetalert2": "^11.26.21"
     }
 }

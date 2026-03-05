@@ -3,10 +3,79 @@
 @tailwind utilities;
 
 [x-cloak] {
-    display: none;
+    display: none !important;
 }
 
-/* Hide scrollbar for sidebar */
+/* Professional Loading Overlay */
+.loader-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.loader-spinner {
+    position: relative;
+    width: 60px;
+    height: 60px;
+}
+
+.spinner-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    animation: spin 1.5s linear infinite;
+}
+
+.spinner-ring:nth-child(1) {
+    border-top-color: #daf63b;
+    animation-delay: 0s;
+}
+
+.spinner-ring:nth-child(2) {
+    border-right-color: #f6d25c;
+    animation-delay: 0.15s;
+    width: 48px;
+    height: 48px;
+    top: 6px;
+    left: 6px;
+}
+
+.spinner-ring:nth-child(3) {
+    border-bottom-color: #d4b206;
+    animation-delay: 0.3s;
+    width: 36px;
+    height: 36px;
+    top: 12px;
+    left: 12px;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loader-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6B7280;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+/* NProgress hidden */
+#nprogress {
+    display: none !important;
+}
+
+/* Hidden Scrollbar for Sidebar */
 .scrollbar-hide {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
@@ -14,309 +83,4 @@
 
 .scrollbar-hide::-webkit-scrollbar {
     display: none;  /* Chrome, Safari and Opera */
-}
-
-/* ========================================
-   Modern Loading Spinner
-   ======================================== */
-
-/* Loader Overlay - Full screen, semi-transparent backdrop */
-.loader-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
-/* Dark theme overlay */
-.loader-overlay.dark {
-    background: rgba(17, 24, 39, 0.85);
-}
-
-/* Loader Container */
-.loader-container {
-    position: relative;
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Outer rotating ring with gradient */
-.loader-ring-outer {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    border: 4px solid transparent;
-    border-top-color: #6366f1;
-    border-right-color: #8b5cf6;
-    animation: spin-outer 1.5s linear infinite;
-}
-
-/* Middle counter-rotating ring */
-.loader-ring-middle {
-    position: absolute;
-    width: 65%;
-    height: 65%;
-    border-radius: 50%;
-    border: 3px solid transparent;
-    border-bottom-color: #ec4899;
-    border-left-color: #f59e0b;
-    animation: spin-middle 1.2s linear infinite reverse;
-}
-
-/* Inner ring */
-.loader-ring-inner {
-    position: absolute;
-    width: 35%;
-    height: 35%;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
-    animation: pulse-inner 1s ease-in-out infinite;
-    box-shadow: 
-        0 0 20px rgba(99, 102, 241, 0.4),
-        0 0 40px rgba(139, 92, 246, 0.2);
-}
-
-/* Center dot with glow */
-.loader-center {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #6366f1, #ec4899);
-    box-shadow: 
-        0 0 10px rgba(99, 102, 241, 0.6),
-        0 0 20px rgba(236, 72, 153, 0.4);
-    animation: pulse-center 0.8s ease-in-out infinite;
-}
-
-/* Loading text */
-.loader-text {
-    position: absolute;
-    bottom: -35px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #6b7280;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    animation: fade-pulse 1.5s ease-in-out infinite;
-}
-
-/* Dark theme loader text */
-.loader-overlay.dark .loader-text {
-    color: #9ca3af;
-}
-
-/* Keyframe Animations */
-
-/* Outer ring rotation */
-@keyframes spin-outer {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-/* Middle ring counter-rotation */
-@keyframes spin-middle {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(-360deg);
-    }
-}
-
-/* Inner ring pulse */
-@keyframes pulse-inner {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% {
-        transform: scale(0.9);
-        opacity: 0.8;
-    }
-}
-
-/* Center dot pulse */
-@keyframes pulse-center {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow: 
-            0 0 10px rgba(99, 102, 241, 0.6),
-            0 0 20px rgba(236, 72, 153, 0.4);
-    }
-    50% {
-        transform: scale(1.2);
-        box-shadow: 
-            0 0 15px rgba(99, 102, 241, 0.8),
-            0 0 30px rgba(236, 72, 153, 0.6);
-    }
-}
-
-/* Loading text fade */
-@keyframes fade-pulse {
-    0%, 100% {
-        opacity: 0.5;
-    }
-    50% {
-        opacity: 1;
-    }
-}
-
-/* Responsive sizing */
-@media (max-width: 640px) {
-    .loader-container {
-        width: 60px;
-        height: 60px;
-    }
-    
-    .loader-text {
-        font-size: 12px;
-        bottom: -28px;
-    }
-}
-
-/* Large screens */
-@media (min-width: 1280px) {
-    .loader-container {
-        width: 100px;
-        height: 100px;
-    }
-    
-    .loader-text {
-        font-size: 16px;
-    }
-}
-
-/* ========================================
-   Inertia Progress Bar Enhancement
-   ======================================== */
-
-/* Custom inertia progress bar */
-#inertia-progress {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 3px !important;
-    z-index: 10000 !important;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899) !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5) !important;
-}
-
-/* ========================================
-   NProgress Custom Spinner
-   ======================================== */
-
-/* NProgress container */
-#nprogress {
-    pointer-events: none;
-    position: fixed;
-    z-index: 99999;
-    top: 0;
-    left: 0;
-    width: 100%;
-}
-
-/* Remove default NProgress bar */
-#nprogress .bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
-    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
-    z-index: 99999;
-}
-
-/* Custom NProgress spinner */
-#nprogress .peg {
-    display: none;
-}
-
-/* Custom spinner element */
-#nprogress .spinner {
-    display: block;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 100000;
-}
-
-/* Spinner icon */
-#nprogress .spinner-icon {
-    width: 48px;
-    height: 48px;
-    border: 3px solid transparent;
-    border-top-color: #6366f1;
-    border-right-color: #8b5cf6;
-    border-radius: 50%;
-    animation: nprogress-spinner 0.8s linear infinite;
-    box-shadow: 
-        0 0 15px rgba(99, 102, 241, 0.4),
-        0 0 30px rgba(139, 92, 246, 0.2);
-}
-
-/* Inner spinning element */
-#nprogress .spinner-icon::before {
-    content: '';
-    position: absolute;
-    top: 6px;
-    left: 6px;
-    right: 6px;
-    bottom: 6px;
-    border: 2px solid transparent;
-    border-bottom-color: #ec4899;
-    border-left-color: #f59e0b;
-    border-radius: 50%;
-    animation: nprogress-spinner-reverse 0.6s linear infinite;
-}
-
-/* Center dot */
-#nprogress .spinner-icon::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 8px;
-    height: 8px;
-    background: linear-gradient(135deg, #6366f1, #ec4899);
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgba(99, 102, 241, 0.6);
-}
-
-@keyframes nprogress-spinner {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes nprogress-spinner-reverse {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(-360deg);
-    }
 }
