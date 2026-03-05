@@ -180,6 +180,7 @@ class DashboardController extends Controller
 
         return Inertia::render('Dashboard', [
             'user' => $user,
+            'userRole' => $user->role ? $user->role->slug : null,
             'stats' => $stats,
         ]);
     }

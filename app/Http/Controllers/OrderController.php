@@ -16,12 +16,30 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = Order::with(['branch', 'user', 'items.product'])->paginate(10);
-        $branches = Branch::select('id', 'name')->get();
+        $user = auth()->user();
+        $isAdmin = $user->role && $user->role->slug === 'admin';
         
-        // Get products with their quantities for each branch
+        // Get user's managed branches if manager
+        $managedBranchIds = [];
+        if (!$isAdmin && $user->role && ($user->role->slug === 'manager' || $user->role->slug === 'sales')) {
+            $managedBranchIds = $user->managedBranches()->pluck('id')->toArray();
+        }
+        
+        $orders = Order::with(['branch', 'user', 'items.product'])
+            ->when(!$isAdmin && count($managedBranchIds) > 0, fn($q) => $q->whereIn('branch_id', $managedBranchIds))
+            ->paginate(10);
+        
+        $branches = Branch::select('id', 'name')
+            ->when(!$isAdmin && count($managedBranchIds) > 0, fn($q) => $q->whereIn('id', $managedBranchIds))
+            ->get();
+        
+        // Get products with their quantities for allowed branches
         $branchInventories = [];
-        $allInventories = Inventory::with('product')->get();
+        $inventoriesQuery = Inventory::with('product');
+        if (!$isAdmin && count($managedBranchIds) > 0) {
+            $inventoriesQuery = $inventoriesQuery->whereIn('branch_id', $managedBranchIds);
+        }
+        $allInventories = $inventoriesQuery->get();
         
         foreach ($allInventories as $inventory) {
             if (!isset($branchInventories[$inventory->branch_id])) {
@@ -47,6 +65,15 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
+        $user = auth()->user();
+        $isAdmin = $user->role && $user->role->slug === 'admin';
+        
+        // Get user's managed branches if manager or sales
+        $managedBranchIds = [];
+        if (!$isAdmin && $user->role && ($user->role->slug === 'manager' || $user->role->slug === 'sales')) {
+            $managedBranchIds = $user->managedBranches()->pluck('id')->toArray();
+        }
+        
         $validated = $request->validate([
             'branch_id' => 'required|exists:branches,id',
             'status' => 'required|in:pending,processing,completed,cancelled',
@@ -54,6 +81,11 @@ class OrderController extends Controller
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
         ]);
+
+        // Check if user can manage this branch
+        if (!$isAdmin && !in_array($validated['branch_id'], $managedBranchIds)) {
+            return back()->withErrors(['branch_id' => 'You can only manage orders for your assigned branch.']);
+        }
 
         // Validate quantity doesn't exceed available stock
         foreach ($validated['items'] as $item) {
@@ -136,6 +168,20 @@ class OrderController extends Controller
 
     public function update(Request $request, Order $order)
     {
+        $user = auth()->user();
+        $isAdmin = $user->role && $user->role->slug === 'admin';
+        
+        // Get user's managed branches if manager or sales
+        $managedBranchIds = [];
+        if (!$isAdmin && $user->role && ($user->role->slug === 'manager' || $user->role->slug === 'sales')) {
+            $managedBranchIds = $user->managedBranches()->pluck('id')->toArray();
+        }
+        
+        // Check if user can manage this branch
+        if (!$isAdmin && !in_array($order->branch_id, $managedBranchIds)) {
+            return back()->withErrors(['branch_id' => 'You can only manage orders for your assigned branch.']);
+        }
+        
         $validated = $request->validate([
             'branch_id' => 'required|exists:branches,id',
             'status' => 'required|in:pending,processing,completed,cancelled',
@@ -235,6 +281,20 @@ class OrderController extends Controller
 
     public function destroy(Order $order)
     {
+        $user = auth()->user();
+        $isAdmin = $user->role && $user->role->slug === 'admin';
+        
+        // Get user's managed branches if manager or sales
+        $managedBranchIds = [];
+        if (!$isAdmin && $user->role && ($user->role->slug === 'manager' || $user->role->slug === 'sales')) {
+            $managedBranchIds = $user->managedBranches()->pluck('id')->toArray();
+        }
+        
+        // Check if user can manage this branch
+        if (!$isAdmin && !in_array($order->branch_id, $managedBranchIds)) {
+            return back()->withErrors(['branch_id' => 'You can only manage orders for your assigned branch.']);
+        }
+        
         // Restore inventory before deletion
         foreach ($order->items as $item) {
             $inventory = Inventory::where('branch_id', $order->branch_id)

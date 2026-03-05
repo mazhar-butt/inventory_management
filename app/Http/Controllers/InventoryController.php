@@ -13,8 +13,23 @@ class InventoryController extends Controller
 {
     public function index()
     {
-        $inventories = Inventory::with(['branch', 'product'])->paginate(10);
-        $branches = Branch::select('id', 'name')->get();
+        $user = auth()->user();
+        $isAdmin = $user->role && $user->role->slug === 'admin';
+        
+        // Get user's managed branches if manager
+        $managedBranchIds = [];
+        if (!$isAdmin && $user->role && $user->role->slug === 'manager') {
+            $managedBranchIds = $user->managedBranches()->pluck('id')->toArray();
+        }
+        
+        $inventories = Inventory::with(['branch', 'product'])
+            ->when(!$isAdmin && count($managedBranchIds) > 0, fn($q) => $q->whereIn('branch_id', $managedBranchIds))
+            ->paginate(10);
+        
+        $branches = Branch::select('id', 'name')
+            ->when(!$isAdmin && count($managedBranchIds) > 0, fn($q) => $q->whereIn('id', $managedBranchIds))
+            ->get();
+            
         $products = Product::select('id', 'name', 'sku')->get();
         return Inertia::render('Inventories/Index', [
             'inventories' => $inventories,
@@ -25,11 +40,25 @@ class InventoryController extends Controller
 
     public function store(Request $request)
     {
+        $user = auth()->user();
+        $isAdmin = $user->role && $user->role->slug === 'admin';
+        
+        // Get user's managed branches if manager
+        $managedBranchIds = [];
+        if (!$isAdmin && $user->role && $user->role->slug === 'manager') {
+            $managedBranchIds = $user->managedBranches()->pluck('id')->toArray();
+        }
+        
         $validated = $request->validate([
             'branch_id' => 'required|exists:branches,id',
             'product_id' => 'required|exists:products,id',
             'quantity' => 'required|integer|min:0',
         ]);
+
+        // Check if manager can manage this branch
+        if (!$isAdmin && !in_array($validated['branch_id'], $managedBranchIds)) {
+            return back()->withErrors(['branch_id' => 'You can only manage your own branch inventory.']);
+        }
 
         $existing = Inventory::where('branch_id', $validated['branch_id'])
             ->where('product_id', $validated['product_id'])
@@ -75,6 +104,20 @@ class InventoryController extends Controller
 
     public function update(Request $request, Inventory $inventory)
     {
+        $user = auth()->user();
+        $isAdmin = $user->role && $user->role->slug === 'admin';
+        
+        // Get user's managed branches if manager
+        $managedBranchIds = [];
+        if (!$isAdmin && $user->role && $user->role->slug === 'manager') {
+            $managedBranchIds = $user->managedBranches()->pluck('id')->toArray();
+        }
+        
+        // Check if manager can manage this branch
+        if (!$isAdmin && !in_array($inventory->branch_id, $managedBranchIds)) {
+            return back()->withErrors(['branch_id' => 'You can only manage your own branch inventory.']);
+        }
+        
         $validated = $request->validate([
             'branch_id' => 'required|exists:branches,id',
             'product_id' => 'required|exists:products,id',
@@ -106,6 +149,20 @@ class InventoryController extends Controller
 
     public function destroy(Inventory $inventory)
     {
+        $user = auth()->user();
+        $isAdmin = $user->role && $user->role->slug === 'admin';
+        
+        // Get user's managed branches if manager
+        $managedBranchIds = [];
+        if (!$isAdmin && $user->role && $user->role->slug === 'manager') {
+            $managedBranchIds = $user->managedBranches()->pluck('id')->toArray();
+        }
+        
+        // Check if manager can manage this branch
+        if (!$isAdmin && !in_array($inventory->branch_id, $managedBranchIds)) {
+            return back()->withErrors(['branch_id' => 'You can only manage your own branch inventory.']);
+        }
+        
         // Create inventory movement before deletion
         InventoryMovement::create([
             'branch_id' => $inventory->branch_id,
@@ -124,6 +181,20 @@ class InventoryController extends Controller
 
     public function addStock(Request $request, Inventory $inventory)
     {
+        $user = auth()->user();
+        $isAdmin = $user->role && $user->role->slug === 'admin';
+        
+        // Get user's managed branches if manager
+        $managedBranchIds = [];
+        if (!$isAdmin && $user->role && $user->role->slug === 'manager') {
+            $managedBranchIds = $user->managedBranches()->pluck('id')->toArray();
+        }
+        
+        // Check if manager can manage this branch
+        if (!$isAdmin && !in_array($inventory->branch_id, $managedBranchIds)) {
+            return back()->withErrors(['branch_id' => 'You can only manage your own branch inventory.']);
+        }
+        
         $validated = $request->validate([
             'quantity' => 'required|integer|min:1',
         ]);
