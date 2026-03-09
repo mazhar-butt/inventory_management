@@ -220,8 +220,8 @@ const formatCurrency = (value) => {
             </div>
 
             <!-- Table -->
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                <div class="overflow-x-auto">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-none">
+                <div class="">
                     <table class="min-w-full divide-y divide-slate-200">
                         <thead class="bg-gradient-to-r from-slate-50 to-slate-100">
                             <tr>

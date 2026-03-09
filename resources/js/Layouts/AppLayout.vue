@@ -78,7 +78,7 @@ const navRoutes = [
                 </nav>
 
                 <!-- Page Content -->
-                <main class="py-6 overflow-y-auto h-screen">
+                <main class="py-6 overflow-auto h-screen scrollbar-hide">
                     <div class="max-w-7xl mx-auto px-6">
                         <slot></slot>
                     </div>

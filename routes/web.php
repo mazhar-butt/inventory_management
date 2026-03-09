@@ -48,6 +48,7 @@ Route::middleware([
     Route::post('/inventories/{inventory}/add-stock', [InventoryController::class, 'addStock'])->name('inventories.addStock');
     Route::resource('orders', OrderController::class)->names('orders');
     Route::resource('order-items', OrderItemController::class)->names('order-items');
+        Route::resource('inventory-movements', InventoryMovementController::class)->names('inventory-movements');
 })->middleware(RoleMiddleware::class . ':manager');
 
 // Sales Routes
