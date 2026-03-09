@@ -77,7 +77,7 @@ const getRouteUrl = (routeName) => {
         'branches': baseUrl + '/branches',
         'inventories': baseUrl + '/inventories',
         'orders': baseUrl + '/orders',
-        'movements': baseUrl + '/movements',
+        'movements': baseUrl + '/inventory-movements',
     };
     return routeMap[routeName] || '#';
 };
