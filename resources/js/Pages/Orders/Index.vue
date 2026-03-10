@@ -405,12 +405,12 @@ const getCompletedOrders = computed(() => {
                     </div>
                 </div>
 
-                <div class="mb-4">
+                <!-- <div class="mb-4">
                     <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
                     <div class="px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-700">
                         {{ editingItem ? form.status : 'Completed' }}
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Order Items -->
                 <div class="border border-slate-200 rounded-xl p-4">
